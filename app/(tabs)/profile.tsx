@@ -4,9 +4,13 @@ import { Text, View } from '@/components/Themed';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProfile, updateProfile } from '@/lib/repos';
 import { getCurrentLocation, geocodeAddress, classifyFarm, FarmLocation } from '@/lib/usda-api';
+import { useAuth } from '@/lib/auth-context';
+import { signOut } from '@/lib/auth';
+import { router } from 'expo-router';
 
 export default function ProfileScreen() {
 	const qc = useQueryClient();
+	const { user, refreshUser } = useAuth();
 	const [name, setName] = useState('');
 	const [farmName, setFarmName] = useState('');
 	const [address, setAddress] = useState('');
@@ -108,9 +112,40 @@ export default function ProfileScreen() {
 		Alert.alert('Success', 'Profile saved successfully');
 	};
 
+	const handleSignOut = async () => {
+		Alert.alert(
+			'Sign Out',
+			'Are you sure you want to sign out?',
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{
+					text: 'Sign Out',
+					style: 'destructive',
+					onPress: async () => {
+						try {
+							await signOut();
+							await refreshUser();
+							router.replace('/auth/login');
+						} catch (error) {
+							Alert.alert('Error', 'Failed to sign out');
+						}
+					},
+				},
+			]
+		);
+	};
+
 	return (
 		<ScrollView style={styles.container}>
 			<Text style={styles.title}>Farm Profile</Text>
+			
+			{user && (
+				<View style={styles.userSection}>
+					<Text style={styles.userName}>{user.name}</Text>
+					<Text style={styles.userEmail}>{user.email || user.phone}</Text>
+					<Text style={styles.userProvider}>Signed in with {user.provider || 'email'}</Text>
+				</View>
+			)}
 			
 			<View style={styles.section}>
 				<Text style={styles.sectionTitle}>Basic Information</Text>
@@ -178,6 +213,11 @@ export default function ProfileScreen() {
 					{profile.data.address && <Text>Address: {profile.data.address}</Text>}
 				</View>
 			)}
+
+			<View style={styles.section}>
+				<Text style={styles.sectionTitle}>Account</Text>
+				<Button title="Sign Out" onPress={handleSignOut} color="#ff4444" />
+			</View>
 		</ScrollView>
 	);
 }
@@ -227,6 +267,27 @@ const styles = StyleSheet.create({
 	infoTitle: {
 		fontWeight: 'bold',
 		marginBottom: 8,
+	},
+	userSection: {
+		marginBottom: 20,
+		padding: 16,
+		backgroundColor: '#f8f9fa',
+		borderRadius: 8,
+		alignItems: 'center',
+	},
+	userName: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		marginBottom: 4,
+	},
+	userEmail: {
+		fontSize: 16,
+		color: '#666',
+		marginBottom: 4,
+	},
+	userProvider: {
+		fontSize: 14,
+		color: '#999',
 	},
 });
 

@@ -14,8 +14,25 @@ export async function initializeDatabase(): Promise<void> {
 
 	await executeSqlAsync(
 		db,
+		`CREATE TABLE IF NOT EXISTS users (
+			id INTEGER PRIMARY KEY NOT NULL,
+			email TEXT UNIQUE,
+			phone TEXT UNIQUE,
+			name TEXT NOT NULL,
+			provider TEXT, -- 'google', 'apple', 'microsoft', 'email'
+			provider_id TEXT,
+			avatar_url TEXT,
+			is_active INTEGER DEFAULT 1,
+			created_at TEXT DEFAULT (datetime('now')),
+			updated_at TEXT DEFAULT (datetime('now'))
+		)`
+	);
+
+	await executeSqlAsync(
+		db,
 		`CREATE TABLE IF NOT EXISTS profile (
 			id INTEGER PRIMARY KEY NOT NULL,
+			user_id INTEGER,
 			name TEXT,
 			farm_name TEXT,
 			location TEXT,
@@ -28,7 +45,8 @@ export async function initializeDatabase(): Promise<void> {
 			farm_type TEXT,
 			efficiency_score REAL,
 			usda_strata_id TEXT,
-			created_at TEXT DEFAULT (datetime('now'))
+			created_at TEXT DEFAULT (datetime('now')),
+			FOREIGN KEY (user_id) REFERENCES users(id)
 		)`
 	);
 

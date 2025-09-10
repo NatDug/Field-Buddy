@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // USDA QuickStats API configuration
 const QUICKSTATS_BASE_URL = 'https://quickstats.nass.usda.gov/api/api_GET';
-const QUICKSTATS_KEY = 'YOUR_API_KEY_HERE'; // Replace with actual API key
+const QUICKSTATS_KEY = '628375F3-25E7-3C82-8C14-B9C8C1D39E7C';
 
 export interface FarmLocation {
   latitude: number;

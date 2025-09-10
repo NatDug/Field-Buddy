@@ -47,8 +47,14 @@ export async function deleteExpense(id: number) {
 }
 
 // Profile/Farm Management
-export async function getProfile() {
-	const res = await executeAsync('SELECT * FROM profile LIMIT 1');
+export async function getProfile(userId?: number) {
+	if (!userId) {
+		// Get current user's profile
+		const res = await executeAsync('SELECT p.* FROM profile p JOIN users u ON p.user_id = u.id WHERE u.is_active = 1 LIMIT 1');
+		return res.rows._array[0] || null;
+	}
+	
+	const res = await executeAsync('SELECT * FROM profile WHERE user_id = ?', [userId]);
 	return res.rows._array[0] || null;
 }
 
@@ -65,8 +71,8 @@ export async function updateProfile(profile: {
 	farm_type?: string;
 	efficiency_score?: number;
 	usda_strata_id?: string;
-}) {
-	const existing = await getProfile();
+}, userId?: number) {
+	const existing = await getProfile(userId);
 	
 	if (existing) {
 		// Update existing profile
@@ -79,9 +85,16 @@ export async function updateProfile(profile: {
 			[...values, existing.id]
 		);
 	} else {
-		// Create new profile
-		const fields = Object.keys(profile).filter(key => profile[key as keyof typeof profile] !== undefined);
-		const values = fields.map(key => profile[key as keyof typeof profile]);
+		// Create new profile - need to get current user ID
+		if (!userId) {
+			const userRes = await executeAsync('SELECT id FROM users WHERE is_active = 1 LIMIT 1');
+			const user = userRes.rows._array[0];
+			if (!user) throw new Error('No authenticated user found');
+			userId = user.id;
+		}
+		
+		const fields = ['user_id', ...Object.keys(profile).filter(key => profile[key as keyof typeof profile] !== undefined)];
+		const values = [userId, ...fields.slice(1).map(key => profile[key as keyof typeof profile])];
 		const placeholders = fields.map(() => '?').join(', ');
 		
 		await executeAsync(
