@@ -26,18 +26,20 @@ export interface AuthResult {
 }
 
 // OAuth Configuration
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // Replace with actual Google OAuth client ID
-const MICROSOFT_CLIENT_ID = 'YOUR_MICROSOFT_CLIENT_ID'; // Replace with actual Microsoft OAuth client ID
+const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+const MICROSOFT_CLIENT_ID = process.env.EXPO_PUBLIC_MICROSOFT_CLIENT_ID || 'YOUR_MICROSOFT_CLIENT_ID';
 
-const GOOGLE_REDIRECT_URI = AuthSession.makeRedirectUri({
-  scheme: 'agriden',
-  path: 'auth/google',
-});
+const GOOGLE_REDIRECT_URI = process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI || 
+  AuthSession.makeRedirectUri({
+    scheme: 'agriden',
+    path: 'auth/google',
+  });
 
-const MICROSOFT_REDIRECT_URI = AuthSession.makeRedirectUri({
-  scheme: 'agriden',
-  path: 'auth/microsoft',
-});
+const MICROSOFT_REDIRECT_URI = process.env.EXPO_PUBLIC_MICROSOFT_REDIRECT_URI || 
+  AuthSession.makeRedirectUri({
+    scheme: 'agriden',
+    path: 'auth/microsoft',
+  });
 
 /**
  * Get current authenticated user
