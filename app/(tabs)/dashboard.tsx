@@ -4,7 +4,7 @@ import { Text, View } from '@/components/Themed';
 export default function DashboardScreen() {
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Field Buddy</Text>
+			<Text style={styles.title}>Agriden</Text>
 			<Text>Simple dashboards for tasks, weather, and finances coming soon.</Text>
 		</View>
 	);

@@ -5,6 +5,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { persistQueryClient } from '@tanstack/query-persist-client-core';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeDatabase } from '@/lib/db';
 import 'react-native-reanimated';
 
@@ -60,9 +63,29 @@ function RootLayoutNav() {
   );
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+      gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
+    },
+  },
+});
+
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: 'agriden-cache',
+});
 
 function AppProviders({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    // Persist query client on mount
+    persistQueryClient({
+      queryClient,
+      persister: asyncStoragePersister,
+    });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       {children}

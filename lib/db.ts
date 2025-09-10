@@ -4,7 +4,7 @@ let database: SQLite.SQLiteDatabase | null = null;
 
 export function getDatabase(): SQLite.SQLiteDatabase {
 	if (!database) {
-		database = SQLite.openDatabase('field_buddy.db');
+		database = SQLite.openDatabase('agriden.db');
 	}
 	return database;
 }

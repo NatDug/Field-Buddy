@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Field-Buddy",
-    "slug": "Field-Buddy",
+  "name": "Agriden",
+  "slug": "Agriden",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "fieldbuddy",
+    "scheme": "agriden",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
