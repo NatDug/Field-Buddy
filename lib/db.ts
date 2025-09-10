@@ -84,4 +84,21 @@ function executeSqlAsync(db: SQLite.SQLiteDatabase, sql: string, params: any[] =
 	});
 }
 
+export function executeAsync(sql: string, params: any[] = []): Promise<SQLite.SQLResultSet> {
+	const db = getDatabase();
+	return new Promise((resolve, reject) => {
+		db.transaction(tx => {
+			tx.executeSql(
+				sql,
+				params,
+				(_tx, result) => resolve(result),
+				(_tx, error) => {
+					reject(error);
+					return false;
+				}
+			);
+		});
+	});
+}
+
 
