@@ -12,12 +12,13 @@ interface AuthGuardProps {
 export default function AuthGuard({ children }: AuthGuardProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      // Redirect to login if not authenticated
-      router.replace('/auth/login');
-    }
-  }, [isLoading, isAuthenticated]);
+  // Temporarily disable auth guard for development
+  // useEffect(() => {
+  //   if (!isLoading && !isAuthenticated) {
+  //     // Redirect to login if not authenticated
+  //     router.replace('/auth/login');
+  //   }
+  // }, [isLoading, isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -28,15 +29,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0066cc" />
-        <Text style={styles.loadingText}>Redirecting to login...</Text>
-      </View>
-    );
-  }
-
+  // Always allow access during development
   return <>{children}</>;
 }
 
