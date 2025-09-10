@@ -19,6 +19,15 @@ export async function initializeDatabase(): Promise<void> {
 			name TEXT,
 			farm_name TEXT,
 			location TEXT,
+			latitude REAL,
+			longitude REAL,
+			state TEXT,
+			county TEXT,
+			zip_code TEXT,
+			address TEXT,
+			farm_type TEXT,
+			efficiency_score REAL,
+			usda_strata_id TEXT,
 			created_at TEXT DEFAULT (datetime('now'))
 		)`
 	);

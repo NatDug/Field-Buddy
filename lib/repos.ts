@@ -46,4 +46,49 @@ export async function deleteExpense(id: number) {
 	await executeAsync('DELETE FROM expenses WHERE id = ?', [id]);
 }
 
+// Profile/Farm Management
+export async function getProfile() {
+	const res = await executeAsync('SELECT * FROM profile LIMIT 1');
+	return res.rows._array[0] || null;
+}
+
+export async function updateProfile(profile: {
+	name?: string;
+	farm_name?: string;
+	location?: string;
+	latitude?: number;
+	longitude?: number;
+	state?: string;
+	county?: string;
+	zip_code?: string;
+	address?: string;
+	farm_type?: string;
+	efficiency_score?: number;
+	usda_strata_id?: string;
+}) {
+	const existing = await getProfile();
+	
+	if (existing) {
+		// Update existing profile
+		const fields = Object.keys(profile).filter(key => profile[key as keyof typeof profile] !== undefined);
+		const values = fields.map(key => profile[key as keyof typeof profile]);
+		const setClause = fields.map(field => `${field} = ?`).join(', ');
+		
+		await executeAsync(
+			`UPDATE profile SET ${setClause} WHERE id = ?`,
+			[...values, existing.id]
+		);
+	} else {
+		// Create new profile
+		const fields = Object.keys(profile).filter(key => profile[key as keyof typeof profile] !== undefined);
+		const values = fields.map(key => profile[key as keyof typeof profile]);
+		const placeholders = fields.map(() => '?').join(', ');
+		
+		await executeAsync(
+			`INSERT INTO profile (${fields.join(', ')}) VALUES (${placeholders})`,
+			values
+		);
+	}
+}
+
 
