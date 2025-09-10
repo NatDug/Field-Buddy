@@ -6,6 +6,11 @@ import { Platform } from 'react-native';
 
 export interface SimpleDatabase {
   executeSql: (sql: string, params?: any[]) => Promise<{ rows: { _array: any[] }, insertId?: number }>;
+  transaction: (callback: (tx: SimpleTransaction) => void) => Promise<void>;
+}
+
+export interface SimpleTransaction {
+  executeSql: (sql: string, params?: any[], success?: () => void, error?: (error: any) => boolean) => void;
 }
 
 class AsyncStorageDatabase implements SimpleDatabase {
@@ -181,6 +186,34 @@ class AsyncStorageDatabase implements SimpleDatabase {
       await AsyncStorage.setItem(`${this.storageKey}_${tableName}`, JSON.stringify(data));
     } catch (error) {
       console.error(`Error setting table data for ${tableName}:`, error);
+    }
+  }
+
+  async transaction(callback: (tx: SimpleTransaction) => void): Promise<void> {
+    const tx: SimpleTransaction = {
+      executeSql: (sql: string, params?: any[], success?: () => void, error?: (error: any) => boolean) => {
+        this.executeSql(sql, params || [])
+          .then(() => {
+            if (success) success();
+          })
+          .catch((err) => {
+            if (error) {
+              const shouldContinue = error(err);
+              if (!shouldContinue) {
+                console.error('Transaction error:', err);
+              }
+            } else {
+              console.error('Transaction error:', err);
+            }
+          });
+      }
+    };
+    
+    try {
+      callback(tx);
+    } catch (error) {
+      console.error('Transaction callback error:', error);
+      throw error;
     }
   }
 }

@@ -105,20 +105,26 @@ export async function initializeDatabase(): Promise<void> {
 	);
 }
 
-function executeSqlAsync(db: SQLite.SQLiteDatabase, sql: string, params: any[] = []): Promise<void> {
-	return new Promise((resolve, reject) => {
-		db.transaction(tx => {
-			tx.executeSql(
-				sql,
-				params,
-				() => resolve(),
-				(_tx, error) => {
-					reject(error);
-					return false;
-				}
-			);
+function executeSqlAsync(db: SQLite.SQLiteDatabase | SimpleDatabase, sql: string, params: any[] = []): Promise<void> {
+	if (isWebPlatform()) {
+		// Use web database implementation
+		return (db as SimpleDatabase).executeSql(sql, params).then(() => {});
+	} else {
+		// Use SQLite implementation
+		return new Promise((resolve, reject) => {
+			(db as SQLite.SQLiteDatabase).transaction(tx => {
+				tx.executeSql(
+					sql,
+					params,
+					() => resolve(),
+					(_tx, error) => {
+						reject(error);
+						return false;
+					}
+				);
+			});
 		});
-	});
+	}
 }
 
 export function executeAsync(sql: string, params: any[] = []): Promise<any> {
