@@ -1,12 +1,22 @@
 import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
+import { getSimpleDatabase, isWebPlatform, SimpleDatabase } from './db-simple';
 
 let database: SQLite.SQLiteDatabase | null = null;
+let webDatabase: SimpleDatabase | null = null;
 
-export function getDatabase(): SQLite.SQLiteDatabase {
-	if (!database) {
-		database = SQLite.openDatabase('agriden.db');
+export function getDatabase(): SQLite.SQLiteDatabase | SimpleDatabase {
+	if (isWebPlatform()) {
+		if (!webDatabase) {
+			webDatabase = getSimpleDatabase();
+		}
+		return webDatabase;
+	} else {
+		if (!database) {
+			database = SQLite.openDatabase('agriden.db');
+		}
+		return database;
 	}
-	return database;
 }
 
 export async function initializeDatabase(): Promise<void> {
@@ -111,21 +121,28 @@ function executeSqlAsync(db: SQLite.SQLiteDatabase, sql: string, params: any[] =
 	});
 }
 
-export function executeAsync(sql: string, params: any[] = []): Promise<SQLite.SQLResultSet> {
+export function executeAsync(sql: string, params: any[] = []): Promise<any> {
 	const db = getDatabase();
-	return new Promise((resolve, reject) => {
-		db.transaction(tx => {
-			tx.executeSql(
-				sql,
-				params,
-				(_tx, result) => resolve(result),
-				(_tx, error) => {
-					reject(error);
-					return false;
-				}
-			);
+	
+	if (isWebPlatform()) {
+		// Use simple database implementation for web
+		return (db as SimpleDatabase).executeSql(sql, params);
+	} else {
+		// Use SQLite implementation for mobile
+		return new Promise((resolve, reject) => {
+			(db as SQLite.SQLiteDatabase).transaction(tx => {
+				tx.executeSql(
+					sql,
+					params,
+					(_tx, result) => resolve(result),
+					(_tx, error) => {
+						reject(error);
+						return false;
+					}
+				);
+			});
 		});
-	});
+	}
 }
 
 
