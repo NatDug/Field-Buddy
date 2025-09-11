@@ -26,7 +26,7 @@ export default function EchoTab() {
 	const del = useMutation({ mutationFn: (key: string) => deleteUiOverride(key), onSuccess: () => qc.invalidateQueries({ queryKey: ['ui_overrides'] }) });
 
 	const [keyName, setKeyName] = useState('brand.name');
-	const [value, setValue] = useState('FarmMaster Pro');
+	const [value, setValue] = useState('Agriden');
 
 	if (!allowed) {
 		return (
@@ -64,7 +64,7 @@ export default function EchoTab() {
 
 			<View style={styles.card}>
 				<Text style={styles.cardTitle}>Preview</Text>
-				<Text>Brand: {(overrides.data?.['brand.name'] as string) || 'FarmMaster Pro'}</Text>
+				<Text>Brand: {(overrides.data?.['brand.name'] as string) || 'Agriden'}</Text>
 				<Text>Dashboard banner: {(overrides.data?.['dashboard.banner'] as string) || 'Welcome to your dashboard'}</Text>
 			</View>
 		</View>

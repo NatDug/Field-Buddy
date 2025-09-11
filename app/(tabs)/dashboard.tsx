@@ -21,7 +21,7 @@ export default function DashboardScreen() {
 	return (
 		<ScrollView style={styles.container}>
 			<View style={styles.header}>
-				<Text style={styles.brand}>FarmMaster Pro</Text>
+				<Text style={styles.brand}>Agriden</Text>
 				<TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
 					<Text style={styles.logoutText}>Log Out</Text>
 				</TouchableOpacity>
