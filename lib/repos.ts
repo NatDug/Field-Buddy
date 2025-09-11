@@ -104,4 +104,21 @@ export async function updateProfile(profile: {
 	}
 }
 
+// UI Overrides (admin)
+export async function getUiOverrides() {
+	const res = await executeAsync('SELECT key, value FROM ui_overrides');
+	const rows = res.rows._array as { key: string, value: string }[];
+	const map: Record<string, string> = {};
+	rows.forEach(r => { map[r.key] = r.value; });
+	return map;
+}
+
+export async function setUiOverride(key: string, value: string) {
+	await executeAsync('INSERT INTO ui_overrides (key, value, updated_at) VALUES (?, ?, datetime("now")) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at', [key, value]);
+}
+
+export async function deleteUiOverride(key: string) {
+	await executeAsync('DELETE FROM ui_overrides WHERE key = ?', [key]);
+}
+
 

@@ -103,6 +103,16 @@ export async function initializeDatabase(): Promise<void> {
 			FOREIGN KEY (crop_id) REFERENCES crops(id)
 		)`
 	);
+
+	// UI overrides for admin-controlled text/labels/etc
+	await executeSqlAsync(
+		db,
+		`CREATE TABLE IF NOT EXISTS ui_overrides (
+			key TEXT PRIMARY KEY,
+			value TEXT,
+			updated_at TEXT DEFAULT (datetime('now'))
+		)`
+	);
 }
 
 function executeSqlAsync(db: SQLite.SQLiteDatabase | SimpleDatabase, sql: string, params: any[] = []): Promise<void> {

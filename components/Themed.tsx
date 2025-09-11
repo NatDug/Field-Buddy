@@ -3,43 +3,33 @@
  * https://docs.expo.io/guides/color-schemes/
  */
 
+import * as React from 'react';
 import { Text as DefaultText, View as DefaultView } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from './useColorScheme';
 
-type ThemeProps = {
+export type ThemeProps = {
   lightColor?: string;
   darkColor?: string;
 };
 
-export type TextProps = ThemeProps & DefaultText['props'];
-export type ViewProps = ThemeProps & DefaultView['props'];
-
-export function useThemeColor(
-  props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
-) {
-  const theme = useColorScheme() ?? 'light';
-  const colorFromProps = props[theme];
-
-  if (colorFromProps) {
-    return colorFromProps;
-  } else {
-    return Colors[theme][colorName];
-  }
+export function Text(props: ThemeProps & DefaultText['props']) {
+	const { style, ...otherProps } = props;
+	return <DefaultText style={style} {...otherProps} />;
 }
 
-export function Text(props: TextProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-
-  return <DefaultText style={[{ color }, style]} {...otherProps} />;
+export function View(props: ThemeProps & DefaultView['props']) {
+	const { style, ...otherProps } = props;
+	return <DefaultView style={style} {...otherProps} />;
 }
 
-export function View(props: ViewProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
-
-  return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
+// Simple override context for admin UI text changes
+const UiOverrideContext = React.createContext<Record<string, string> | null>(null);
+export function UiOverrideProvider({ value, children }: { value: Record<string, string> | null, children: React.ReactNode }) {
+	return <UiOverrideContext.Provider value={value}>{children}</UiOverrideContext.Provider>;
+}
+export function useUiOverride(key: string, fallback: string): string {
+	const map = React.useContext(UiOverrideContext);
+	return (map && map[key]) || fallback;
 }

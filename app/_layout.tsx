@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/query-persist-client-core';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,6 +13,8 @@ import { AuthProvider } from '@/lib/auth-context';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { UiOverrideProvider } from '@/components/Themed';
+import { getUiOverrides } from '@/lib/repos';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -53,13 +55,17 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const overrides = useQuery({ queryKey: ['ui_overrides'], queryFn: getUiOverrides });
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
+      <UiOverrideProvider value={overrides.data || null}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="echo-tab" options={{ title: 'Echo Tab' }} />
+        </Stack>
+      </UiOverrideProvider>
     </ThemeProvider>
   );
 }
