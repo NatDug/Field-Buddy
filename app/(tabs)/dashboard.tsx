@@ -1,65 +1,69 @@
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useQuery } from '@tanstack/react-query';
 import { getProfile } from '@/lib/repos';
+import { signOut } from '@/lib/auth';
+import { useAuth } from '@/lib/auth-context';
+import { router } from 'expo-router';
 
 export default function DashboardScreen() {
 	const profile = useQuery({ queryKey: ['profile'], queryFn: getProfile });
+	const { refreshUser } = useAuth();
+
+	const handleLogout = async () => {
+		try {
+			await signOut();
+			await refreshUser();
+			router.replace('/auth/login');
+		} catch {}
+	};
 
 	return (
 		<ScrollView style={styles.container}>
-			<Text style={styles.title}>Agriden Dashboard</Text>
-			
-			{profile.data ? (
-				<View>
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Farm Overview</Text>
-						<Text style={styles.farmName}>{profile.data.farm_name || 'Unnamed Farm'}</Text>
-						<Text style={styles.farmerName}>Farmer: {profile.data.name || 'Not set'}</Text>
+			<View style={styles.header}>
+				<Text style={styles.brand}>FarmMaster Pro</Text>
+				<TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+					<Text style={styles.logoutText}>Log Out</Text>
+				</TouchableOpacity>
+			</View>
+
+			<View style={styles.cardRow}>
+				<View style={styles.card}>
+					<Text style={styles.cardTitle}>Yield Progress</Text>
+					<View style={styles.barGroup}>
+						<View style={[styles.bar, { width: '20%', backgroundColor: '#eafbea' }]} />
+						<View style={[styles.bar, { width: '45%', backgroundColor: '#bff5bf' }]} />
+						<View style={[styles.bar, { width: '75%', backgroundColor: '#22e055' }]} />
 					</View>
+					<Text style={styles.smallText}>Current yield is at 75% compared to last season's average.</Text>
+					<TouchableOpacity style={styles.ctaBtn}>
+						<Text style={styles.ctaText}>Crop Management</Text>
+					</TouchableOpacity>
+				</View>
 
-					{profile.data.farm_type && (
-						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>USDA Classification</Text>
-							<View style={styles.classificationCard}>
-								<Text style={styles.classificationType}>{profile.data.farm_type}</Text>
-								<Text style={styles.efficiencyScore}>
-									Efficiency Score: {profile.data.efficiency_score?.toFixed(1)}%
-								</Text>
-								{profile.data.usda_strata_id && (
-									<Text style={styles.strataId}>Strata ID: {profile.data.usda_strata_id}</Text>
-								)}
-							</View>
-						</View>
-					)}
-
-					{profile.data.latitude && profile.data.longitude && (
-						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>Location</Text>
-							<Text style={styles.coordinates}>
-								{profile.data.latitude.toFixed(4)}, {profile.data.longitude.toFixed(4)}
-							</Text>
-							{profile.data.address && (
-								<Text style={styles.address}>{profile.data.address}</Text>
-							)}
-						</View>
-					)}
-
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Quick Actions</Text>
-						<Text style={styles.actionText}>• Add crops and track varieties</Text>
-						<Text style={styles.actionText}>• Log daily tasks and expenses</Text>
-						<Text style={styles.actionText}>• Monitor weather alerts</Text>
-						<Text style={styles.actionText}>• Generate compliance reports</Text>
+				<View style={styles.card}>
+					<Text style={styles.cardTitle}>Weather Alerts</Text>
+					<View style={{ height: 80, justifyContent: 'center' }}>
+						<Text style={styles.smallText}>Severe thunderstorm warning in the northern fields.</Text>
 					</View>
 				</View>
-			) : (
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Welcome to Agriden!</Text>
-					<Text style={styles.welcomeText}>
-						Get started by setting up your farm profile in the Profile tab. 
-						Add your location to unlock USDA data integration and farm classification.
-					</Text>
+
+				<View style={styles.card}>
+					<Text style={styles.cardTitle}>Upcoming Tasks</Text>
+					<Text style={styles.smallText}>Irrigation check - 10 AM{"\n"}Fertilizer application - 2 PM{"\n"}Pest control assessment - 4 PM</Text>
+					<TouchableOpacity style={styles.ctaBtn}>
+						<Text style={styles.ctaText}>Compliance & Reports</Text>
+					</TouchableOpacity>
+				</View>
+			</View>
+
+			{profile.data && (
+				<View style={styles.metaCard}>
+					<Text style={styles.metaTitle}>Welcome, {profile.data.name || 'Farmer'}</Text>
+					<Text style={styles.metaText}>Farm: {profile.data.farm_name || 'Unnamed Farm'}</Text>
+					{profile.data.farm_type && (
+						<Text style={styles.metaText}>Type: {profile.data.farm_type} · Efficiency {profile.data.efficiency_score?.toFixed(1)}%</Text>
+					)}
 				</View>
 			)}
 		</ScrollView>
@@ -71,69 +75,84 @@ const styles = StyleSheet.create({
 		flex: 1,
 		padding: 16,
 	},
-	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		marginBottom: 20,
-		textAlign: 'center',
+	header: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		marginBottom: 16,
 	},
-	section: {
-		marginBottom: 20,
+	brand: {
+		fontSize: 18,
+		fontWeight: 'bold',
+	},
+	logoutBtn: {
+		backgroundColor: '#22e055',
+		paddingHorizontal: 12,
+		paddingVertical: 8,
+		borderRadius: 16,
+	},
+	logoutText: {
+		color: '#fff',
+		fontWeight: '600',
+	},
+	cardRow: {
+		flexDirection: 'row',
+		gap: 12,
+		marginBottom: 16,
+	},
+	card: {
+		flex: 1,
+		backgroundColor: '#fff',
+		borderRadius: 12,
 		padding: 16,
-		borderRadius: 8,
+		shadowColor: '#000',
+		shadowOpacity: 0.05,
+		shadowRadius: 8,
 		borderWidth: 1,
-		borderColor: '#ddd',
+		borderColor: '#f0f0f0',
 	},
-	sectionTitle: {
-		fontSize: 18,
-		fontWeight: 'bold',
-		marginBottom: 12,
-	},
-	farmName: {
-		fontSize: 20,
-		fontWeight: 'bold',
-		marginBottom: 4,
-	},
-	farmerName: {
+	cardTitle: {
 		fontSize: 16,
-		color: '#666',
-	},
-	classificationCard: {
-		padding: 12,
-		backgroundColor: '#f0f8ff',
-		borderRadius: 6,
-	},
-	classificationType: {
-		fontSize: 18,
 		fontWeight: 'bold',
-		color: '#0066cc',
 		marginBottom: 8,
 	},
-	efficiencyScore: {
-		fontSize: 16,
+	barGroup: {
+		gap: 6,
+		marginVertical: 8,
+	},
+	bar: {
+		height: 10,
+		borderRadius: 4,
+	},
+	ctaBtn: {
+		alignSelf: 'flex-start',
+		marginTop: 12,
+		backgroundColor: '#22e055',
+		paddingHorizontal: 12,
+		paddingVertical: 8,
+		borderRadius: 16,
+	},
+	ctaText: {
+		color: '#fff',
+		fontWeight: '600',
+	},
+	smallText: {
+		color: '#444',
+	},
+	metaCard: {
+		marginTop: 8,
+		padding: 16,
+		borderRadius: 12,
+		borderWidth: 1,
+		borderColor: '#f0f0f0',
+		backgroundColor: '#f8f9fa',
+	},
+	metaTitle: {
+		fontWeight: 'bold',
 		marginBottom: 4,
 	},
-	strataId: {
-		fontSize: 14,
-		color: '#666',
-	},
-	coordinates: {
-		fontSize: 16,
-		fontFamily: 'monospace',
-		marginBottom: 4,
-	},
-	address: {
-		fontSize: 14,
-		color: '#666',
-	},
-	actionText: {
-		fontSize: 16,
-		marginBottom: 8,
-	},
-	welcomeText: {
-		fontSize: 16,
-		lineHeight: 24,
-		textAlign: 'center',
+	metaText: {
+		color: '#555',
 	},
 });
 
