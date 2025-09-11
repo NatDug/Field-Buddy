@@ -32,9 +32,12 @@ export default function TabLayout() {
         <Tabs.Screen name="crops" options={{ title: 'Crops', tabBarIcon: ({ color }) => <TabBarIcon name="leaf" color={color} /> }} />
         <Tabs.Screen name="tasks" options={{ title: 'Tasks', tabBarIcon: ({ color }) => <TabBarIcon name="check-square" color={color} /> }} />
         <Tabs.Screen name="expenses" options={{ title: 'Expenses', tabBarIcon: ({ color }) => <TabBarIcon name="dollar" color={color} /> }} />
+        <Tabs.Screen name="inventory" options={{ title: 'Inventory', tabBarIcon: ({ color }) => <TabBarIcon name="archive" color={color} /> }} />
+        <Tabs.Screen name="documents" options={{ title: 'Documents', tabBarIcon: ({ color }) => <TabBarIcon name="file" color={color} /> }} />
         <Tabs.Screen name="alerts" options={{ title: 'Alerts', tabBarIcon: ({ color }) => <TabBarIcon name="bell" color={color} /> }} />
         <Tabs.Screen name="reports" options={{ title: 'Reports', tabBarIcon: ({ color }) => <TabBarIcon name="file-text" color={color} /> }} />
         <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} /> }} />
+        <Tabs.Screen name="team" options={{ title: 'Team', tabBarIcon: ({ color }) => <TabBarIcon name="users" color={color} /> }} />
       </Tabs>
     </AuthGuard>
   );

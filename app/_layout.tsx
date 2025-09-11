@@ -15,6 +15,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { UiOverrideProvider } from '@/components/Themed';
 import { getUiOverrides } from '@/lib/repos';
+import { Image, View } from 'react-native';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -47,7 +48,11 @@ export default function RootLayout() {
   }, [loaded]);
 
   if (!loaded) {
-    return null;
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
+        <Image source={require('../assets/images/splash-icon.png')} style={{ width: 160, height: 160, resizeMode: 'contain' }} />
+      </View>
+    );
   }
 
   return <AppProviders><RootLayoutNav /></AppProviders>;
